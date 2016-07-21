@@ -2,29 +2,26 @@
 /*jshint esversion:6*/
 
 const net = require('net');
-const process = require('process');
-const stdin = process.stdin;
-const stdout = process.stdout;
 
-exports = modules.export = {};
+exports = module.exports = {};
 const sockets = [];
 
-net.createServer((socket) => {
+exports = net.createServer((socket) => {
   socket.name = socket.remotePort;
   socket.write('Hi ' + socket.name + '!\n');
   sockets.push(socket);
-  console.log('request');
-  socket.on('data', (chunk) => {
-    console.log(chunk.toString());
-    broadcast(chunk, socket);
-  });
-  exports.broadcast = function broadcast (message, sender) {
+
+  exports.broadcast = function (message, sender) {
     sockets.forEach((s) => {
       if(s !== sender) {
         s.write(socket.name + '> ' + message);
       }
     });
-  }
+  };
+
+  socket.on('data', (chunk) => {
+    exports.broadcast(chunk, socket);
+  });
 }).listen(3000, () => {
   console.log('chat server started on port 3000');
 });
